@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 
   ros::NodeHandle n;
 
-  ros::Subscriber sub = n.subscribe("map", 1000, chatterCallback);
+  ros::Subscriber sub = n.subscribe("map", 1000, gridCallback);
 
 
 
