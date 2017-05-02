@@ -1,5 +1,7 @@
 #include "ros/ros.h"
 #include "nav_msgs/OccupancyGrid.msg"
+#include <tf/transform_listener.h>
+#include <costmap_2d/costmap_2d_ros.h>
 
 void gridCallback(const nav_msgs::OccupancyGrid.msg::ConstPtr& msg)
 {
