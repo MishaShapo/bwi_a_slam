@@ -16,12 +16,41 @@ void costmap_cb(const nav_msgs::OccupancyGrid::ConstPtr& msg){
 	std::cout << "costmap_cb got a message: " << msg << std::endl;
     nav_msgs::MapMetaData mmd = msg->info;
 
-    
+    u_char data[3*msg->data.size()];
     uint32_t width = mmd.width;
     uint32_t height = mmd.height;
-    
-    Mat image = Mat(height, width, CV_8UC1, msg->data);
+
+    for(int i = 0; i < msg->data.size(); i++){
+    	int confidence = msg->data.at(i);
+    	if(confidence < 0){
+    		data[3*i] = 0;
+    		data[3*i+1] = 0;
+    		data[3*i+2] = 0;
+    	} else if (confidence < 70){
+    		data[3*i] = 60;
+    		data[3*i+1] = 20;
+    		data[3*i+2] = 20;
+    	} else if (confidence < 90){
+    		data[3*i] = 200;
+    		data[3*i+1] = 150;
+    		data[3*i+2] = 50;
+    	} else{
+    		data[3*i] = 0;
+    		data[3*i+1] = 0;
+    		data[3*i+2] = 255;
+    	}
+    	
+    }
+
+    std::cout << "\nShowing Image" << std::endl;
+    Mat temp = Mat(height, width, CV_8UC3, data);
+    Mat temp2;
+    Mat image;
+  	resize(temp, temp2, cv::Size(temp.rows*2, temp.cols*2), cv::INTER_NEAREST);
+    flip(temp2,image,1);
     imshow( "Local Costmap", image );
+
+    waitKey(10);
 }
 
 
