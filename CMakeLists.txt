@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(bwi_a_slam)
 
+find_package(OpenCV)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -136,6 +139,7 @@ add_executable(grid_reader src/grid_reader.cpp)
 ## Specify libraries to link a library or executable target against
  target_link_libraries(grid_reader
    ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
  )
 
 #############
