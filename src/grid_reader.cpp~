@@ -67,7 +67,7 @@ void odom_cb(const nav_msgs::Odometry::ConstPtr& msg){
     tf::Matrix3x3 matrix(quat2);
     double roll, pitch, y;
     matrix.getRPY(roll, pitch, y);
-    
+    std::cout << "RPY: " << roll << " , " << pitch << " , " << yaw << std::endl;
     yaw = y;
 }
 
