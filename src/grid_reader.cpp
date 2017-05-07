@@ -6,11 +6,16 @@
 #include "std_msgs/UInt32.h"
 #include <opencv2/opencv.hpp>
 #include "stdint.h"
+#include <tf/transform_datatypes.h>
+#include "nav_msgs/Odometry.h"
+#include <math.h>
 
 
 using namespace cv;
 using namespace nav_msgs;
 using namespace std_msgs;
+
+double yaw = 0.0;
 
 void costmap_cb(const nav_msgs::OccupancyGrid::ConstPtr& msg){
 	std::cout << "costmap_cb got a message: " << msg << std::endl;
@@ -48,9 +53,22 @@ void costmap_cb(const nav_msgs::OccupancyGrid::ConstPtr& msg){
     Mat image;
   	resize(temp, temp2, cv::Size(temp.rows*2, temp.cols*2), cv::INTER_NEAREST);
     flip(temp2,image,1);
+    
+    arrowedLine(image,Point(image.rows/2,image.cols/2),Point(image.rows/2 + cos(yaw)*50,image.cols/2 + sin(yaw)*50),Scalar(100,100,20),10,8);
+    
     imshow( "Local Costmap", image );
 
     waitKey(10);
+}
+
+void odom_cb(const nav_msgs::Odometry::ConstPtr& msg){
+    geometry_msgs::Quaternion quat = msg->pose.pose.orientation;
+    tf::Quaternion quat2(quat.x, quat.y, quat.z, quat.w);
+    tf::Matrix3x3 matrix(quat2);
+    double roll, pitch, y;
+    matrix.getRPY(roll, pitch, y);
+    
+    yaw = y;
 }
 
 
@@ -60,6 +78,7 @@ int main(int argc, char** argv){
 	ros::NodeHandle n;
 	
 	ros::Subscriber costmap_sub = n.subscribe("/move_base/local_costmap/costmap",100,costmap_cb);
+    ros::Subscriber odom_sub = n.subscribe("/odom", 100, odom_cb);
 	namedWindow( "Local Costmap", WINDOW_AUTOSIZE );
     
     
