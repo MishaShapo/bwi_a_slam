@@ -1,0 +1,8 @@
+grid_reader:
+	-input: costmap, odom
+	-output: image of local costmap
+
+
+explorer:
+	-input: image of local costmap
+	-otuput: nav goals to map the building
