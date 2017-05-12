@@ -8,8 +8,13 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  actionlib
+  actionlib_msgs
+  move_base_msgs
   roscpp
   std_msgs
+  tf
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -131,6 +136,7 @@ include_directories(
 
 ## Declare a C++ executable
 add_executable(grid_reader src/grid_reader.cpp)
+add_executable(explorer src/explorer.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -138,6 +144,11 @@ add_executable(grid_reader src/grid_reader.cpp)
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(grid_reader
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+ )
+
+target_link_libraries(explorer
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
  )
