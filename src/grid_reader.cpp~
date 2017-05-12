@@ -21,47 +21,60 @@ using namespace std_msgs;
 double yaw = 0.0;
 
 void costmap_cb(const nav_msgs::OccupancyGrid::ConstPtr& msg){
-	std::cout << "costmap_cb got a message: " << msg << std::endl;
+
     nav_msgs::MapMetaData mmd = msg->info;
 
-    u_char data[3*msg->data.size()];
     uint32_t width = mmd.width;
+
     uint32_t height = mmd.height;
 
-    for(int i = 0; i < msg->data.size(); i++){
+    Mat data(width, height, CV_8UC3, Scalar(0,0,0));
+
+	std::cout << "Message data size : " << msg->data.size() << std::endl;
+    std::cout << "Width and height : " << width << "," << height << std::endl;	
+
+    for(int i = 0; i < height * width; i++){
     	int confidence = msg->data.at(i);
+	int x = i % width;
+	int y = height - 1 - i / height;
+	if (confidence>0){
+	//std::cout<< "non neg = " << confidence << "x,y = " << x << "," << y <<std::endl;
+	}
+
+
     	if(confidence < 0){
-    		data[3*i] = 0;
-    		data[3*i+1] = 0;
-    		data[3*i+2] = 0;
+    		data.at<Vec3b>(x,y)[0] = 0;
+		data.at<Vec3b>(x,y)[1] = 0;
+		data.at<Vec3b>(x,y)[2] = 0;
     	} else if (confidence < 70){
-    		data[3*i] = 60;
-    		data[3*i+1] = 20;
-    		data[3*i+2] = 20;
+    		data.at<Vec3b>(x,y)[0] = 60;
+		data.at<Vec3b>(x,y)[1] = 20;
+		data.at<Vec3b>(x,y)[2] = 20;
     	} else if (confidence < 90){
-    		data[3*i] = 200;
-    		data[3*i+1] = 150;
-    		data[3*i+2] = 50;
+    		data.at<Vec3b>(x,y)[0] = 200;
+		data.at<Vec3b>(x,y)[1] = 150;
+		data.at<Vec3b>(x,y)[2] = 50;
     	} else{
-    		data[3*i] = 0;
-    		data[3*i+1] = 0;
-    		data[3*i+2] = 255;
+    		data.at<Vec3b>(x,y)[0] = 0;
+		data.at<Vec3b>(x,y)[1] = 0;
+		data.at<Vec3b>(x,y)[2] = 255;
     	}
     	
     }
+    std::cout << "costmap_cb got a message: " << msg << std::endl;
 
     std::cout << "\nShowing Image" << std::endl;
-    Mat temp = Mat(height, width, CV_8UC3, data);
+    //Mat temp = Mat(height, width, CV_8UC3, data);
     Mat temp2;
     Mat image;
-  	resize(temp, temp2, cv::Size(temp.rows*2, temp.cols*2), cv::INTER_NEAREST);
+    resize(data, temp2, cv::Size(data.rows, data.cols), cv::INTER_NEAREST);
     flip(temp2,image,0);
     
     line(image,Point(image.rows/2,image.cols/2),Point(image.rows/2 + cos(yaw)*50,image.cols/2 + sin(yaw)*50),Scalar(100,100,20),10,8);
     
     imshow( "Local Costmap", image );
 
-    waitKey(10);
+    waitKey(3);
 }
 
 void odom_cb(const nav_msgs::Odometry::ConstPtr& msg){
@@ -74,67 +87,20 @@ void odom_cb(const nav_msgs::Odometry::ConstPtr& msg){
     yaw = y;
 }
 
-int getch()
-{
-  static struct termios oldt, newt;
-  tcgetattr( STDIN_FILENO, &oldt);           // save old settings
-  newt = oldt;
-  newt.c_lflag &= ~(ICANON);                 // disable buffering      
-  tcsetattr( STDIN_FILENO, TCSANOW, &newt);  // apply new settings
-
-  int c = getchar();  // read character (non-blocking)
-
-  tcsetattr( STDIN_FILENO, TCSANOW, &oldt);  // restore old settings
-  return c;
-}
-
 
 int main(int argc, char** argv){
 	ros::init(argc,argv,"grid_reader");
 	
 	ros::NodeHandle n;
 	
-	ros::Subscriber costmap_sub = n.subscribe("/move_base/local_costmap/costmap",100,costmap_cb);
-    	ros::Subscriber odom_sub = n.subscribe("/odom", 100, odom_cb);
+	ros::Subscriber costmap_sub = n.subscribe("/map",100,costmap_cb);
+    	//ros::Subscriber odom_sub = n.subscribe("/odom", 100, odom_cb);
 
-	ros::Publisher vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 10);
+	
 	namedWindow( "Local Costmap", WINDOW_AUTOSIZE );
 
-	ros::Rate rate(100.0);
-
-	float x,y,z,th;
-	bool pause = false;
-	int counter = 0;
-	
 	while(ros::ok()){
-		geometry_msgs::Twist goal;
-		int c = getch();   // call your non-blocking input function
-	  		
-		if(c == ' '){
-			pause = true;
-			goal.linear.x = 0;
-			goal.linear.x = 0;
-			goal.linear.x = 0;
-			goal.angular.z = 0;
-			vel_pub.publish(goal);
-		} else if(c == '\x0D'){
-			pause = false;
-			counter = 0;
-		}
-
-		if(pause){
-			continue;
-		}
-
-		goal.angular.z = -1;
-		vel_pub.publish(goal);
-		if(counter >= 100){
-			pause = true;
-		}			
-	
-		ros::spinOnce();
-		rate.sleep();
-		
+		ros::spin();
 	}
     	
 	return 0;

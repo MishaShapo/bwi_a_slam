@@ -3,43 +3,76 @@
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
 #include <tf/transform_listener.h>
+#include "geometry_msgs/Twist.h"
+
+#include <stdio.h>
+#include <termios.h>            //termios, TCSANOW, ECHO, ICANON
+#include <unistd.h> 
 #include <math.h>
+
+/*
+int getch()
+{
+  static struct termios oldt, newt;
+  tcgetattr( STDIN_FILENO, &oldt);           // save old settings
+  newt = oldt;
+  newt.c_lflag &= ~(ICANON);                 // disable buffering      
+  tcsetattr( STDIN_FILENO, TCSANOW, &newt);  // apply new settings
+
+  int c = getchar();  // read character (non-blocking)
+
+  tcsetattr( STDIN_FILENO, TCSANOW, &oldt);  // restore old settings
+  return c;
+}*/
+
+int getc(){
+  system ("/bin/stty raw");
+  int c = getchar();
+  /* use system call to set terminal behaviour to more normal behaviour */
+  system ("/bin/stty cooked");
+  return c;
+
+}
 
 int main(int argc, char** argv){
 	ros::init(argc,argv, "explorer");
 	ros::NodeHandle n;
-	actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac("move_base",true);
 	
-	/*while(!ac.waitForServer(ros::Duration(5.0))){
-		ROS_INFO("Waiting for MoveBaseClient server.\n");	
-	}*/
+	ros::Rate rate(100.0);
 
-	//ac.waitForServer();
+	float x,y,z,th;
+	bool pause = false;
+	int counter = 0;
+
+	ros::Publisher vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 10);
 	
-	move_base_msgs::MoveBaseGoal goal;
-	double yaw = 0.0;
-
 	while(ros::ok()){
-		
-		std::cout << "enter rotation angle (degrees) :\n ";
-		std::cin>>yaw; 	
-		
-		yaw = yaw * 180 / M_PI;
-		
-		std::cout << "Yaw (in degrees) : " << yaw << std::endl;
-		
-		goal.target_pose.header.frame_id = "base_link";
-		goal.target_pose.header.stamp = ros::Time::now();
+		geometry_msgs::Twist goal;
+		int c = getc();   // call your non-blocking input function
+	  		
+		if(c == ' '){
+			pause = true;
+			goal.linear.x = 0;
+			goal.linear.x = 0;
+			goal.linear.x = 0;
+			goal.angular.z = 0;
+			vel_pub.publish(goal);
+		} else if(c == '\x0D'){
+			pause = false;
+			counter = 0;
+		} 
+		//backspace is 127
+		std::cout << "Key = " << c << std::endl;
 
-		goal.target_pose.pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
+		if(pause){
+			continue;
+		}
 
-		ac.sendGoal(goal);
-		
-		std::cout << "state : " << (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) << std::endl;
-
-		bool finished = ac.waitForResult(ros::Duration(5.0));
-
-		std::cout << "finished : " << finished << std::endl;
+		goal.angular.z = -1;
+		vel_pub.publish(goal);			
+	
+		ros::spinOnce();
+		rate.sleep();
 	}
 
 	return 0;
