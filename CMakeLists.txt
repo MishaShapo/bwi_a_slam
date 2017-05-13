@@ -137,6 +137,7 @@ include_directories(
 ## Declare a C++ executable
 add_executable(grid_reader src/grid_reader.cpp)
 add_executable(explorer src/explorer.cpp)
+add_executable(laser_to_cloud src/laser_to_cloud.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

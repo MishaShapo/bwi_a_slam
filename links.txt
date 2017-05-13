@@ -1,0 +1,3 @@
+http://www.iroboapp.org/index.php?title=Adding_A_Global_Path_Planner_As_Plugin_in_ROS
+
+
