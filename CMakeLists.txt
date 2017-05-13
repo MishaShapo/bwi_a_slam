@@ -138,6 +138,7 @@ include_directories(
 add_executable(grid_reader src/grid_reader.cpp)
 add_executable(explorer src/explorer.cpp)
 add_executable(laser_to_cloud src/laser_to_cloud.cpp)
+add_executable(conquistador src/conquistador.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -150,6 +151,16 @@ add_executable(laser_to_cloud src/laser_to_cloud.cpp)
  )
 
 target_link_libraries(explorer
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+ )
+
+target_link_libraries(laser_to_cloud
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+ )
+
+target_link_libraries(conquistador
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
  )
