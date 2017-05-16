@@ -3,6 +3,17 @@ The objective is to develop a better navigation and exploration system for
 the BWI segbots. We will develop new algorithms for having the robot autonomously
 generate a map of an area it has never explored before.
 
+## Usage
+1. Install hector_mapping http://wiki.ros.org/hector_mapping
+   
+   To use hector_mapping, you need a source of sensor_msgs/LaserScan data
+2. Launch grid_reader
+   
+   Grid reader should interpret the occupancy grid created by the robot's sensory input in order to determine movement
+
+3. Launch conquistador
+   
+
 ## Grid reader
 Our grid_reader node subscribes to the bwi's local_costmap rostopic and interprets the occupancy grid created by the robot's sensory input in order to determine movement.
 
