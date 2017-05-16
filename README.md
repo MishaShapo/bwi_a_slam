@@ -13,7 +13,7 @@ generate a map of an area it has never explored before.
    
    Grid reader should interpret the occupancy grid created by the robot's sensory input in order to determine movement
 
-3. Launch conquistador
+3. Launch conquistador and gmapping
 
    -rosrun bwi_a_slam conquistador
    
