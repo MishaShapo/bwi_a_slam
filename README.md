@@ -8,11 +8,13 @@ generate a map of an area it has never explored before.
    
    To use hector_mapping, you need a source of sensor_msgs/LaserScan data
 2. Launch grid_reader
+
    -rosrun bwi_a_slam grid_reader
    
    Grid reader should interpret the occupancy grid created by the robot's sensory input in order to determine movement
 
 3. Launch conquistador
+
    -rosrun bwi_a_slam conquistador
    
 
